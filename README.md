@@ -44,8 +44,6 @@ conf.json:
 }
 ```
 
-Hardcoded parsed fields and generated webhook.
-
 #### Uses feedparser on a rss feed.
 Call rss.py to run, put it in a cron job. \
 Parses the rss_url in conf.json, saves post_ids in data.json. \
