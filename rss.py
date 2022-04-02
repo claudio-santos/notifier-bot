@@ -1,8 +1,8 @@
-import datetime
 import sys
+import time
 
+import feedparser
 from discord_webhook import DiscordWebhook, DiscordEmbed
-from facebook_scraper import get_posts
 
 import myutils
 from myutils import find
@@ -13,8 +13,8 @@ arg2 = sys.argv[2] if len(sys.argv) > 2 else 'data.json'
 conf = myutils.load_json(arg1)
 data = myutils.load_json(arg2)
 
-facebook_account = conf['facebook_url']
-facebook_webhook = conf['discord_url']
+rss_url = conf['rss_url']
+rss_webhook = conf['discord_url']
 
 
 #   Needs data.json like:
@@ -24,7 +24,7 @@ facebook_webhook = conf['discord_url']
 
 #   Needs conf.json like:
 #   {
-#       "facebook_url":"",
+#       "rss_url":"",
 #       "discord_url":"",
 #       "entries":"entries",
 #       "username":"",
@@ -74,10 +74,11 @@ facebook_webhook = conf['discord_url']
 #   }
 
 
-def facebook_posts():
+def rss_posts():
+    rss = feedparser.parse(rss_url)
     ids = []
 
-    for post in get_posts(account=facebook_account, pages=2):
+    for post in rss[conf['entries']]:
         post_id = find(conf['id'], post)
 
         if post_id in data['post_ids']:
@@ -85,21 +86,21 @@ def facebook_posts():
             continue
         ids.append(post_id)
 
-        gen_webhook(post).execute()
+        gen_webhook(post, rss).execute()
 
     data['post_ids'] = ids
     myutils.dump_json('data.json', data)
 
 
-def gen_webhook(post):
+def gen_webhook(post, rss):
     webhook = DiscordWebhook(
-        url=facebook_webhook,
-        username=find(conf['username'], post),
-        avatar_url=find(conf['avatar_url'], post),
-        content=myutils.clean_html(find(conf['content'], post)),
+        url=rss_webhook,
+        username=find(conf['username'], post if conf['e']['username'] else rss),
+        avatar_url=find(conf['avatar_url'], post if conf['e']['avatar_url'] else rss),
+        content=myutils.clean_html(find(conf['content'], post if conf['e']['content'] else rss)),
     )
 
-    imgs = myutils.get_imgs(find(conf['image']['url'], post))
+    imgs = myutils.get_imgs(find(conf['image']['url'], post if conf['e']['image']['url'] else rss))
 
     for img in imgs:
         embed = DiscordEmbed()
@@ -108,23 +109,24 @@ def gen_webhook(post):
         webhook.add_embed(embed)
 
     embed = DiscordEmbed(
-        title=find(conf['title'], post),
-        url=find(conf['url'], post),
-        description=myutils.clean_html(find(conf['description'], post)),
+        title=find(conf['title'], post if conf['e']['title'] else rss),
+        url=find(conf['url'], post if conf['e']['url'] else rss),
+        description=myutils.clean_html(find(conf['description'], post if conf['e']['description'] else rss)),
     )
     embed.set_author(
-        name=find(conf['author']['name'], post),
-        icon_url=find(conf['author']['icon_url'], post),
-        url=find(conf['author']['url'], post)
+        name=find(conf['author']['name'], post if conf['e']['author']['name'] else rss),
+        icon_url=find(conf['author']['icon_url'], post if conf['e']['author']['icon_url'] else rss),
+        url=find(conf['author']['url'], post if conf['e']['author']['url'] else rss)
     )
     embed.set_thumbnail(
-        url=find(conf['thumbnail']['url'], post)
+        url=find(conf['thumbnail']['url'], post if conf['e']['thumbnail']['url'] else rss)
     )
     embed.set_footer(
-        text=datetime.datetime.fromtimestamp(
-            find(conf['footer']['text'], post)
-        ).strftime('%A, %d %B %Y, %H:%M'),
-        icon_url=find(conf['footer']['icon_url'], post)
+        text=time.strftime(
+            '%A, %d %B %Y, %H:%M',
+            find(conf['footer']['text'], post if conf['e']['footer']['text'] else rss)
+        ),
+        icon_url=find(conf['footer']['icon_url'], post if conf['e']['footer']['icon_url'] else rss)
     )
     webhook.add_embed(embed)
 
@@ -132,10 +134,10 @@ def gen_webhook(post):
 
 
 def test():
-    rss = get_posts(account=facebook_account, pages=2)
+    rss = feedparser.parse(rss_url)
     print(rss)
 
 
-if __name__ == "__main__":
-    facebook_posts()
+if __name__ == '__main__':
+    rss_posts()
     # test()
