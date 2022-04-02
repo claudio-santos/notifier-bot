@@ -133,7 +133,8 @@ def gen_webhook(post):
 
 def test():
     rss = get_posts(account=facebook_account, pages=2)
-    print(rss)
+    for post in rss:
+        print(post)
 
 
 if __name__ == "__main__":

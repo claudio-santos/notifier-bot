@@ -112,3 +112,11 @@ conf.json:
    }
 }
 ```
+
+Examples:
+
+![](readme/ex1.jpg)
+
+![](readme/ex2.jpg)
+
+![](readme/ex3.jpg)
