@@ -88,7 +88,7 @@ def facebook_posts():
         gen_webhook(post).execute()
 
     data['post_ids'] = ids
-    myutils.dump_json('data.json', data)
+    myutils.dump_json(arg2, data)
 
 
 def gen_webhook(post):
