@@ -4,13 +4,16 @@ from bs4 import BeautifulSoup
 
 
 def load_json(filename):
-    with open(filename) as file:
-        res = json.load(file)
-    return res
+    try:
+        with open(filename) as file:
+            res = json.load(file)
+        return res
+    except:
+        return
 
 
 def dump_json(filename, data):
-    with open(filename, 'w') as file:
+    with open(filename, 'w+') as file:
         json.dump(data, file)
 
 
@@ -57,14 +60,22 @@ def get_imgs(post_imgs):
     return imgs
 
 
+def text_html(string):
+    if bool(BeautifulSoup(string, 'html.parser').find()) is False:
+        return string
+    string = BeautifulSoup(string, 'html.parser').text
+    print(string)
+    return string
+
+
 def clean_html(string):
     string = string.replace('<br />', '\n')
     if bool(BeautifulSoup(string, 'html.parser').find()) is False:
         return string
     soup = BeautifulSoup(string, 'html.parser')
-    string = soup.prettify()
+    string = soup.prettify().strip()
     for x in soup.find_all():
-        string = string.replace(str(x), '')
+        string = string.replace(x.prettify().strip(), '').strip()
     return string
 
 

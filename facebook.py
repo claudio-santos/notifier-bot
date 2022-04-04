@@ -1,21 +1,10 @@
 import datetime
-import sys
 
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from facebook_scraper import get_posts
 
 import myutils
 from myutils import find
-
-arg1 = sys.argv[1] if len(sys.argv) > 1 else 'conf.json'
-arg2 = sys.argv[2] if len(sys.argv) > 2 else 'data.json'
-
-conf = myutils.load_json(arg1)
-data = myutils.load_json(arg2)
-
-facebook_account = conf['facebook_url']
-facebook_webhook = conf['discord_url']
-
 
 #   Needs data.json like:
 #   {
@@ -74,29 +63,67 @@ facebook_webhook = conf['discord_url']
 #   }
 
 
+test = False
+console = False
+
+conf_path = 'conf.json'
+data_path = 'data.json'
+
+conf = myutils.load_json(conf_path)
+data = myutils.load_json(data_path)
+
+
+def main():
+    facebook_posts()
+
+
 def facebook_posts():
+    posts = get_posts(account=conf['facebook_url'], pages=2)
+
+    if not test:
+        facebook_normal(posts)
+    else:
+        facebook_test(posts)
+
+
+def facebook_normal(posts):
     ids = []
 
-    for post in get_posts(account=facebook_account, pages=2):
+    for post in posts:
         post_id = find(conf['id'], post)
 
         if post_id in data['post_ids']:
             ids.append(post_id)
             continue
+
         ids.append(post_id)
 
-        gen_webhook(post).execute()
+        facebook_post(post)
 
     data['post_ids'] = ids
-    myutils.dump_json(arg2, data)
+    myutils.dump_json(data_path, data)
+
+
+def facebook_test(posts):
+    post = next(posts)
+    if post:
+        facebook_post(post)
+
+
+def facebook_post(post):
+    if not console:
+        gen_webhook(post).execute()
+    else:
+        print(post)
 
 
 def gen_webhook(post):
     webhook = DiscordWebhook(
-        url=facebook_webhook,
+        url=conf['discord_url'],
         username=find(conf['username'], post),
         avatar_url=find(conf['avatar_url'], post),
         content=myutils.clean_html(find(conf['content'], post)),
+        rate_limit_retry=True
     )
 
     imgs = myutils.get_imgs(find(conf['image']['url'], post))
@@ -131,12 +158,6 @@ def gen_webhook(post):
     return webhook
 
 
-def test():
-    rss = get_posts(account=facebook_account, pages=2)
-    for post in rss:
-        print(post)
-
-
 if __name__ == "__main__":
+    test = True
     facebook_posts()
-    # test()

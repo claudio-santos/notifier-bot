@@ -1,4 +1,3 @@
-import sys
 import time
 
 import feedparser
@@ -6,16 +5,6 @@ from discord_webhook import DiscordWebhook, DiscordEmbed
 
 import myutils
 from myutils import find
-
-arg1 = sys.argv[1] if len(sys.argv) > 1 else 'conf.json'
-arg2 = sys.argv[2] if len(sys.argv) > 2 else 'data.json'
-
-conf = myutils.load_json(arg1)
-data = myutils.load_json(arg2)
-
-rss_url = conf['rss_url']
-rss_webhook = conf['discord_url']
-
 
 #   Needs data.json like:
 #   {
@@ -74,8 +63,30 @@ rss_webhook = conf['discord_url']
 #   }
 
 
+test = False
+console = False
+
+conf_path = 'conf.json'
+data_path = 'data.json'
+
+conf = myutils.load_json(conf_path)
+data = myutils.load_json(data_path)
+
+
+def main():
+    rss_posts()
+
+
 def rss_posts():
-    rss = feedparser.parse(rss_url)
+    rss = feedparser.parse(conf['rss_url'])
+
+    if not test:
+        rss_normal(rss)
+    else:
+        rss_test(rss)
+
+
+def rss_normal(rss):
     ids = []
 
     for post in rss[conf['entries']]:
@@ -84,20 +95,35 @@ def rss_posts():
         if post_id in data['post_ids']:
             ids.append(post_id)
             continue
+
         ids.append(post_id)
 
-        gen_webhook(post, rss).execute()
+        rss_post(rss, post)
 
     data['post_ids'] = ids
-    myutils.dump_json(arg2, data)
+    myutils.dump_json(data_path, data)
+
+
+def rss_test(rss):
+    post = rss[conf['entries']][0]
+    if post:
+        rss_post(rss, post)
+
+
+def rss_post(rss, post):
+    if not console:
+        gen_webhook(post, rss).execute()
+    else:
+        print(post)
 
 
 def gen_webhook(post, rss):
     webhook = DiscordWebhook(
-        url=rss_webhook,
+        url=conf['discord_url'],
         username=find(conf['username'], post if conf['e']['username'] else rss),
         avatar_url=find(conf['avatar_url'], post if conf['e']['avatar_url'] else rss),
         content=myutils.clean_html(find(conf['content'], post if conf['e']['content'] else rss)),
+        rate_limit_retry=True
     )
 
     imgs = myutils.get_imgs(find(conf['image']['url'], post if conf['e']['image']['url'] else rss))
@@ -133,11 +159,6 @@ def gen_webhook(post, rss):
     return webhook
 
 
-def test():
-    rss = feedparser.parse(rss_url)
-    print(rss)
-
-
 if __name__ == '__main__':
+    test = True
     rss_posts()
-    # test()
