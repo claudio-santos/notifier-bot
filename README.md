@@ -1,6 +1,6 @@
 # notifier-bot
 
-```commandline
+```text
 usage: notifier-bot.py [-h] [-t] [-c] -p {rss,facebook} [conf] [data]
 
 Scrapes webpages and sends new items to a discord webhook. Parses the webpage
@@ -21,8 +21,7 @@ positional arguments:
 ```
 
 #### facebook-scraper
-Parses the facebook_url in conf.json, saves post_ids in data.json. \
-Call facebook.py arg1 arg2 to specify conf.json and data.json.
+Parses the facebook_url in conf.json, saves post_ids in data.json.
 
 data.json:
 ```json
@@ -63,7 +62,6 @@ conf.json:
 
 #### feedparser
 Parses the rss_url in conf.json, saves post_ids in data.json. \
-Call rss.py arg1 arg2 to specify conf.json and data.json. \
 Field true if entry or false if feed.
 
 data.json:
