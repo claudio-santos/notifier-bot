@@ -1,4 +1,5 @@
 from datetime import datetime
+from pprint import pprint
 
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from facebook_scraper import get_posts
@@ -115,7 +116,7 @@ def facebook_post(post):
     if not console:
         gen_webhook(post).execute()
     else:
-        print(post)
+        pprint(post)
 
 
 def gen_webhook(post):

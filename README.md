@@ -21,16 +21,10 @@ positional arguments:
 ```
 
 #### facebook-scraper
-Parses the facebook_url in conf.json, saves post_ids in data.json.
+Parses the facebook_url in conf.json. \
+Saves post ids and timestamps in data.json.
 
-data.json:
-```json
-{
-   "post_ids": []
-}
-```
-
-conf.json:
+Needed conf.json:
 ```json
 {
    "facebook_url":"",
@@ -61,17 +55,11 @@ conf.json:
 ```
 
 #### feedparser
-Parses the rss_url in conf.json, saves post_ids in data.json. \
-Field true if entry or false if feed.
+Parses the rss_url in conf.json. \
+Saves post ids and timestamps in data.json. \
+Fields "e" true if entry or false if feed.
 
-data.json:
-```json
-{
-   "post_ids": []
-}
-```
-
-conf.json:
+Needed conf.json:
 ```json
 {
    "rss_url":"",

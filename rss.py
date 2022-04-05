@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+from pprint import pprint
 
 import feedparser
 from discord_webhook import DiscordWebhook, DiscordEmbed
@@ -118,7 +119,7 @@ def rss_post(rss, post):
     if not console:
         gen_webhook(post, rss).execute()
     else:
-        print(post)
+        pprint(post)
 
 
 def gen_webhook(post, rss):
