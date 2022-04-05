@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from facebook_scraper import get_posts
@@ -87,21 +87,22 @@ def facebook_posts():
 
 
 def facebook_normal(posts):
-    ids = []
+    ids = {}
 
     for post in posts:
-        post_id = find(conf['id'], post)
+        post_id = str(find(conf['id'], post))
+        post_value = datetime.now().timestamp()
 
-        if post_id in data['post_ids']:
-            ids.append(post_id)
-            continue
+        ids[post_id] = post_value
 
-        ids.append(post_id)
+        if post_id not in data.keys():
+            data[post_id] = post_value
 
         facebook_post(post)
 
-    data['post_ids'] = ids
-    myutils.dump_json(data_path, data)
+    if ids:
+        delta = 3 if not conf.get('delta') else conf.get('delta')
+        myutils.save_data(data_path, data, ids, delta)
 
 
 def facebook_test(posts):
@@ -148,7 +149,7 @@ def gen_webhook(post):
         url=find(conf['thumbnail']['url'], post)
     )
     embed.set_footer(
-        text=datetime.datetime.fromtimestamp(
+        text=datetime.fromtimestamp(
             find(conf['footer']['text'], post)
         ).strftime('%A, %d %B %Y, %H:%M'),
         icon_url=find(conf['footer']['icon_url'], post)

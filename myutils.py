@@ -1,20 +1,33 @@
 import json
+from datetime import datetime
 
 from bs4 import BeautifulSoup
+from dateutil.relativedelta import relativedelta
 
 
 def load_json(filename):
+    res = {}
     try:
         with open(filename) as file:
             res = json.load(file)
-        return res
     except:
-        return
+        pass
+    return res
 
 
 def dump_json(filename, data):
     with open(filename, 'w+') as file:
         json.dump(data, file)
+
+
+def save_data(filename, data, ids, months):
+    for key, value in dict(data).items():
+        date_saved = datetime.fromtimestamp(value)
+        date_check = datetime.now() - relativedelta(months=months)
+        if date_saved < date_check and key not in ids.keys():
+            del data[key]
+
+    dump_json(filename, data)
 
 
 def find(element, json_data):
@@ -64,7 +77,6 @@ def text_html(string):
     if bool(BeautifulSoup(string, 'html.parser').find()) is False:
         return string
     string = BeautifulSoup(string, 'html.parser').text
-    print(string)
     return string
 
 

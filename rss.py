@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 import feedparser
 from discord_webhook import DiscordWebhook, DiscordEmbed
@@ -87,21 +88,24 @@ def rss_posts():
 
 
 def rss_normal(rss):
-    ids = []
+    ids = {}
 
     for post in rss[conf['entries']]:
-        post_id = find(conf['id'], post)
+        post_id = str(find(conf['id'], post))
+        post_value = datetime.now().timestamp()
 
-        if post_id in data['post_ids']:
-            ids.append(post_id)
+        ids[post_id] = post_value
+
+        if post_id not in data.keys():
+            data[post_id] = post_value
+        else:
             continue
-
-        ids.append(post_id)
 
         rss_post(rss, post)
 
-    data['post_ids'] = ids
-    myutils.dump_json(data_path, data)
+    if ids:
+        delta = 3 if not conf.get('delta') else conf.get('delta')
+        myutils.save_data(data_path, data, ids, delta)
 
 
 def rss_test(rss):
