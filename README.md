@@ -1,7 +1,7 @@
 # notifier-bot
 
 ```text
-usage: notifier-bot.py [-h] [-t] [-c] -p {rss,facebook} [conf] [data]
+usage: notifier-bot [-h] [-t] [-c] [-v] -p {rss,facebook} [conf] [data]
 
 Scrapes webpages and sends new items to a discord webhook. Parses the webpage
 url in conf.json, saves post ids in data.json.
@@ -10,6 +10,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -t, --test            runs the script for the latest entry
   -c, --console         prints output to console
+  -v, --verbose         sends exceptions to discord webhook
 
 required arguments:
   -p {rss,facebook}, --parser {rss,facebook}
