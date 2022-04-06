@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime
 from pprint import pprint
 
@@ -7,75 +8,28 @@ from facebook_scraper import get_posts
 import myutils
 from myutils import find
 
-#   Needs data.json like:
-#   {
-#       "post_ids": []
-#   }
 
-#   Needs conf.json like:
-#   {
-#       "facebook_url":"",
-#       "discord_url":"",
-#       "entries":"entries",
-#       "username":"",
-#       "avatar_url":"",
-#       "content":"",
-#       "author":{
-#           "name":"",
-#           "url":"",
-#           "icon_url":""
-#       },
-#       "title":"",
-#       "url":"",
-#       "description":"",
-#       "thumbnail":{
-#           "url":""
-#       },
-#       "image":{
-#           "url":""
-#       },
-#       "footer":{
-#           "text":"",
-#           "icon_url":""
-#       },
-#       "e":{
-#           "username":false,
-#           "avatar_url":false,
-#           "content":false,
-#           "author":{
-#               "name":false,
-#               "url":false,
-#               "icon_url":false
-#           },
-#           "title":false,
-#           "url":false,
-#           "description":false,
-#           "thumbnail":{
-#               "url":false
-#           },
-#           "image":{
-#               "url":false
-#           },
-#           "footer":{
-#               "text":false,
-#               "icon_url":false
-#           }
-#       }
-#   }
+def main(_test, _console, _verbose, _conf_path, _data_path):
+    global test, console, verbose, conf_path, data_path, conf, data
 
+    test = _test
+    console = _console
+    verbose = _verbose
+    conf_path = _conf_path
+    data_path = _data_path
 
-test = False
-console = False
+    conf = myutils.load_json(conf_path)
+    data = myutils.load_json(data_path)
 
-conf_path = 'conf.json'
-data_path = 'data.json'
-
-conf = myutils.load_json(conf_path)
-data = myutils.load_json(data_path)
-
-
-def main():
-    facebook_posts()
+    try:
+        facebook_posts()
+    except:
+        if verbose:
+            DiscordWebhook(
+                url=conf['discord_url'],
+                content=traceback.format_exc()
+            ).execute()
+        pass
 
 
 def facebook_posts():
@@ -98,6 +52,8 @@ def facebook_normal(posts):
 
         if post_id not in data.keys():
             data[post_id] = post_value
+        else:
+            continue
 
         facebook_post(post)
 
@@ -162,4 +118,8 @@ def gen_webhook(post):
 
 if __name__ == "__main__":
     test = True
-    facebook_posts()
+    console = False
+    verbose = True
+    conf_path = 'conf.json'
+    data_path = 'data.json'
+    main(test, console, verbose, conf_path, data_path)

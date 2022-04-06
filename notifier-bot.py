@@ -14,6 +14,9 @@ parser.add_argument('-t', '--test', action='store_true',
 parser.add_argument('-c', '--console', action='store_true',
                     help='prints output to console')
 
+parser.add_argument('-v', '--verbose', action='store_true',
+                    help='sends exceptions to discord webhook')
+
 required = parser.add_argument_group('required arguments')
 
 required.add_argument('-p', '--parser', type=str.lower, choices=['rss', 'facebook'], required=True,
@@ -29,19 +32,13 @@ positional.add_argument('data', type=str, nargs='?', default='data.json',
 
 if __name__ == '__main__':
     args = parser.parse_args()
+
     if args.parser == 'rss':
-        rss.test = args.test
-        rss.console = args.console
-        rss.conf_path = args.conf
-        rss.data_path = args.conf
         print('parsing rss...')
-        rss.main()
+        rss.main(args.test, args.console, args.verbose, args.conf, args.data)
         print('finished.')
+
     elif args.parser == 'facebook':
-        facebook.test = args.test
-        facebook.console = args.console
-        facebook.conf_path = args.conf
-        facebook.data_path = args.data
         print('parsing facebook...')
-        facebook.main()
+        facebook.main(args.test, args.console, args.verbose, args.conf, args.data)
         print('finished.')
