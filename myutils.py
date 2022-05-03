@@ -54,7 +54,8 @@ def get_imgs(post_imgs):
         return imgs
 
     if bool(BeautifulSoup(post_imgs, 'html.parser').find()) is False:
-        imgs.append({'src': post_imgs, 'alt': ''})
+        if post_imgs.lower().startswith('http'):
+            imgs.append({'src': post_imgs, 'alt': ''})
         return imgs
 
     xs = BeautifulSoup(post_imgs, 'html.parser').find_all('img')
